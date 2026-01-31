@@ -17,6 +17,17 @@ function isJsonResponse(res: Response): boolean {
   return ct.includes('application/json') || ct.includes('application/problem+json');
 }
 
+// Get API base URL from environment variable, fallback to empty string for development proxy
+function getApiBaseUrl(): string {
+  try {
+    // @ts-ignore - Vite environment variables
+    return import.meta.env?.VITE_API_BASE_URL || '';
+  } catch {
+    return '';
+  }
+}
+const API_BASE_URL = getApiBaseUrl();
+
 export type RequestOptions = Omit<RequestInit, 'body' | 'headers'> & {
   body?: unknown;
   headers?: Record<string, string>;
@@ -36,7 +47,10 @@ export async function httpRequest<T>(path: string, options: RequestOptions = {})
     headers['Authorization'] = `Bearer ${options.token}`;
   }
 
-  const res = await fetch(path, {
+  // Prepend API base URL if provided, otherwise use relative path (for dev proxy)
+  const fullUrl = API_BASE_URL ? `${API_BASE_URL}${path}` : path;
+
+  const res = await fetch(fullUrl, {
     ...options,
     headers,
     body: options.body === undefined ? undefined : JSON.stringify(options.body),

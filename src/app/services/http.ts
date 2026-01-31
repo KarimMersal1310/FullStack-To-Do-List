@@ -21,10 +21,30 @@ function isJsonResponse(res: Response): boolean {
 function getApiBaseUrl(): string {
   try {
     // @ts-ignore - Vite environment variables
-    const apiUrl = import.meta.env?.VITE_API_BASE_URL || '';
+    const env = import.meta.env;
+    // @ts-ignore
+    let apiUrl = env?.VITE_API_BASE_URL;
+    
+    // If not set and we're in production (not localhost), use the default API URL
+    if (!apiUrl && typeof window !== 'undefined') {
+      // @ts-ignore
+      const isProduction = env?.PROD || env?.MODE === 'production' || 
+                          (window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1'));
+      
+      if (isProduction) {
+        // Default production API URL
+        apiUrl = 'http://karimtodolistapi.runasp.net';
+        console.warn('⚠️ VITE_API_BASE_URL not set. Using default:', apiUrl);
+        console.warn('⚠️ Please set VITE_API_BASE_URL in Vercel for proper configuration.');
+      }
+    }
+    
     // Remove trailing slash if present
-    return apiUrl ? apiUrl.replace(/\/$/, '') : '';
-  } catch {
+    return apiUrl ? String(apiUrl).replace(/\/$/, '') : '';
+  } catch (e) {
+    if (typeof window !== 'undefined') {
+      console.error('Error reading API base URL:', e);
+    }
     return '';
   }
 }
@@ -36,6 +56,7 @@ if (typeof window !== 'undefined') {
     console.log('✅ API Base URL configured:', API_BASE_URL);
   } else {
     console.warn('⚠️ API Base URL not set. Using relative paths. Make sure VITE_API_BASE_URL is set in Vercel environment variables.');
+    console.warn('⚠️ This means API calls will go to the current domain (Vercel) instead of the external API.');
   }
 }
 
@@ -63,11 +84,14 @@ export async function httpRequest<T>(path: string, options: RequestOptions = {})
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const fullUrl = API_BASE_URL ? `${API_BASE_URL}${normalizedPath}` : path;
 
-  // Log the full URL in development for debugging
+  // Log the full URL for debugging (in both dev and production)
   if (typeof window !== 'undefined') {
     // @ts-ignore - Vite environment variables
     if (import.meta.env?.DEV) {
-      console.log('API Request:', fullUrl);
+      console.log('🔵 API Request (dev):', fullUrl);
+    } else {
+      // Log in production too, but less verbose
+      console.log('🌐 API Request:', fullUrl);
     }
   }
 

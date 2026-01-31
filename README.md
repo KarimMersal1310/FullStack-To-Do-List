@@ -13,13 +13,23 @@ When deploying to Vercel, you need to set the following environment variable:
 
 ### How to set in Vercel:
 
-1. Go to your Vercel project dashboard
-2. Navigate to **Settings** → **Environment Variables**
-3. Add a new variable:
+1. Go to your Vercel project dashboard: https://vercel.com/dashboard
+2. Select your project: `full-stack-to-do-list-beige`
+3. Navigate to **Settings** → **Environment Variables**
+4. Click **Add New** and add:
    - **Name**: `VITE_API_BASE_URL`
    - **Value**: `http://karimtodolistapi.runasp.net`
-   - **Environment**: Production (and Preview if needed)
-4. Redeploy your application
+   - **Environment**: Select **Production** (and **Preview** if you want it for preview deployments too)
+5. Click **Save**
+6. **IMPORTANT**: Go to **Deployments** tab and click **Redeploy** on your latest deployment (or trigger a new deployment)
+   - ⚠️ **You MUST redeploy after adding environment variables** - Vite reads env vars at build time, so existing deployments won't have the new variable
+
+### Verify it's working:
+
+After redeploying, open your browser console. You should see:
+- ✅ `API Base URL configured: http://karimtodolistapi.runasp.net`
+
+If you see a warning instead, the environment variable is not set correctly.
 
 ### For Local Development
 

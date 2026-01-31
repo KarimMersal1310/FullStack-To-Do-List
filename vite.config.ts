@@ -24,7 +24,7 @@ export default defineConfig({
     // Backend launch settings expose https://localhost:7226 and http://localhost:5105.
     proxy: {
       '/api': {
-        target: 'https://localhost:7226',
+        target: 'http://karimtodolistapi.runasp.net',
         changeOrigin: true,
         secure: false,
       },
